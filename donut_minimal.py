@@ -72,19 +72,21 @@ model = None
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 def load_model():
-    """Load DONUT model fine-tuned on English receipts"""
+    """Load DONUT model fine-tuned on receipts"""
     global processor, model, device
 
     print("\n" + "=" * 60)
-    print("Loading DONUT English Receipt Model...")
+    print("Loading DONUT Receipt Model...")
     print("=" * 60)
 
-    # Using English receipt-trained model
-    model_name = "AdamCodd/donut-receipts-extract"
-    
+    # Using publicly accessible receipt model
+    # Note: AdamCodd/donut-receipts-extract requires HuggingFace authentication
+    # Using naver-clova-ix model which is publicly accessible
+    model_name = "naver-clova-ix/donut-base-finetuned-cord-v2"
+
     print(f"Model: {model_name}")
-    print("This model is trained on English receipts (SROIE dataset)")
-    print("Should perform better on American receipts like Trader Joe's")
+    print("This model is trained on CORD v2 receipt dataset")
+    print("Publicly accessible - no authentication required")
 
     try:
         print("\nLoading processor...")
@@ -435,8 +437,8 @@ def parse_receipt(image):
             except Exception as e:
                 return {"error": f"Failed to convert image array: {str(e)}"}
 
-        # NOTE: This model uses <s_receipt> as task prompt (V2)
-        task_prompt = "<s_receipt>"
+        # NOTE: CORD v2 model uses <s_cord-v2> as task prompt
+        task_prompt = "<s_cord-v2>"
         
         decoder_input_ids = processor.tokenizer(
             task_prompt,

@@ -68,9 +68,9 @@ def test_model_loading():
         from transformers import DonutProcessor, VisionEncoderDecoderModel
         import torch
 
-        model_name = "AdamCodd/donut-receipts-extract"
+        model_name = "naver-clova-ix/donut-base-finetuned-cord-v2"
         print(f"\nAttempting to load model: {model_name}")
-        print("Note: This will download ~800MB on first run")
+        print("Note: This will download ~1.5GB on first run")
 
         device = "cuda" if torch.cuda.is_available() else "cpu"
         print(f"Device: {device}")
