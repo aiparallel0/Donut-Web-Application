@@ -13,7 +13,15 @@ A Gradio-based web application for parsing receipts using the DONUT model fine-t
 
 ## Model
 
-This application uses [AdamCodd/donut-receipts-extract](https://huggingface.co/AdamCodd/donut-receipts-extract), a DONUT model fine-tuned on the SROIE English receipt dataset for better performance on American receipts.
+This application uses [naver-clova-ix/donut-base-finetuned-cord-v2](https://huggingface.co/naver-clova-ix/donut-base-finetuned-cord-v2), a DONUT model fine-tuned on the CORD v2 receipt dataset.
+
+**Why this model?**
+- ✅ Publicly accessible (no authentication required)
+- ✅ Trained on CORD v2 receipt dataset
+- ✅ Works well for English receipts
+- ✅ No gated access restrictions
+
+**Alternative:** If you want to use the [AdamCodd/donut-receipts-extract](https://huggingface.co/AdamCodd/donut-receipts-extract) model (requires HuggingFace authentication), see [AUTHENTICATION.md](AUTHENTICATION.md) for instructions.
 
 ## Installation
 
