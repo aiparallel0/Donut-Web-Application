@@ -1,0 +1,71 @@
+# Docker Compose configuration for DONUT Receipt Parser
+version: '3.8'
+
+services:
+  # Main Gradio web application
+  donut-web:
+    build: .
+    container_name: donut-receipt-parser
+    ports:
+      - "7860:7860"
+    environment:
+      - DONUT_DEVICE=cpu  # Change to 'cuda' if using GPU
+      - GRADIO_SERVER_NAME=0.0.0.0
+      - DONUT_DEBUG=false
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7860/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Optional: REST API service (uncomment to enable)
+  # donut-api:
+  #   build: .
+  #   container_name: donut-api
+  #   command: python api_server.py
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     - DONUT_DEVICE=cpu
+  #     - DONUT_API_ENABLED=true
+  #   volumes:
+  #     - ./data:/app/data
+  #     - ./models:/app/models
+  #     - ./logs:/app/logs
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - donut-web
+
+# Optional: Add GPU support
+# deploy:
+#   resources:
+#     reservations:
+#       devices:
+#         - driver: nvidia
+#           count: 1
+#           capabilities: [gpu]
+
+volumes:
+  data:
+  models:
+  logs:
+
+# Usage:
+# ------
+# Start services:
+#   docker-compose up -d
+#
+# View logs:
+#   docker-compose logs -f
+#
+# Stop services:
+#   docker-compose down
+#
+# Rebuild:
+#   docker-compose up --build

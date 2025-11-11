@@ -1,0 +1,55 @@
+# Development Dependencies for DONUT Receipt Parser
+# Install with: pip install -r requirements-dev.txt
+
+# Include production requirements
+-r requirements.txt
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-xdist>=3.3.1  # Parallel test execution
+pytest-timeout>=2.1.0
+unittest-xml-reporting>=3.2.0
+
+# Code Quality
+black>=23.9.0  # Code formatter
+isort>=5.12.0  # Import sorter
+flake8>=6.1.0  # Linter
+pylint>=2.17.0  # Advanced linter
+mypy>=1.5.0  # Type checker
+
+# Documentation
+sphinx>=7.2.0
+sphinx-rtd-theme>=1.3.0
+sphinx-autodoc-typehints>=1.24.0
+
+# Development Tools
+ipython>=8.15.0  # Interactive Python shell
+jupyter>=1.0.0  # Jupyter notebooks
+ipdb>=0.13.13  # Debugger
+watchdog>=3.0.0  # File system watcher
+
+# API Development
+fastapi>=0.103.0
+uvicorn[standard]>=0.23.0
+python-multipart>=0.0.6
+httpx>=0.25.0  # For API testing
+
+# Performance Profiling
+memory-profiler>=0.61.0
+py-spy>=0.3.14
+scalene>=1.5.0
+
+# Utilities
+python-dotenv>=1.0.0  # Environment variables
+tqdm>=4.66.0  # Progress bars (production also uses this)
+colorama>=0.4.6  # Colored terminal output
+
+# Type Stubs
+types-Pillow>=10.0.0
+types-requests>=2.31.0
+types-tqdm>=4.66.0
+
+# Optional: GPU Monitoring (if using CUDA)
+# nvidia-ml-py>=12.535.0
+# gpustat>=1.1.0
