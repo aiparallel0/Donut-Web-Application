@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 DONUT Receipt Parser - Enhanced with English Receipt Model
 Uses AdamCodd/donut-receipts-extract for better English receipt performance
@@ -10,6 +11,16 @@ from pathlib import Path
 import re
 import json
 import socket
+import signal
+from contextlib import contextmanager
+
+# Windows compatibility for UTF-8 output
+if sys.platform == 'win32':
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stderr.reconfigure(encoding='utf-8')
+    except:
+        pass
 
 # Suppress warnings
 warnings.filterwarnings('ignore')
@@ -405,15 +416,24 @@ def parse_receipt(image):
     if model is None or processor is None:
         print("Model not loaded, loading now...")
         if not load_model():
-            return {"error": "Failed to load model"}
+            return {"error": "Failed to load model. Please ensure dependencies are installed: pip install -r requirements.txt"}
 
     try:
         print("\nProcessing receipt...")
 
+        # Robust image loading with error handling
         if isinstance(image, str):
-            image = Image.open(image).convert("RGB")
+            if not os.path.exists(image):
+                return {"error": f"Image file not found: {image}"}
+            try:
+                image = Image.open(image).convert("RGB")
+            except Exception as e:
+                return {"error": f"Failed to open image file: {str(e)}"}
         elif not isinstance(image, Image.Image):
-            image = Image.fromarray(image).convert("RGB")
+            try:
+                image = Image.fromarray(image).convert("RGB")
+            except Exception as e:
+                return {"error": f"Failed to convert image array: {str(e)}"}
 
         # NOTE: This model uses <s_receipt> as task prompt (V2)
         task_prompt = "<s_receipt>"
@@ -430,18 +450,42 @@ def parse_receipt(image):
         ).pixel_values.to(device)
 
         print("Generating predictions...")
-        with torch.no_grad():
-            outputs = model.generate(
-                pixel_values,
-                decoder_input_ids=decoder_input_ids,
-                max_length=model.decoder.config.max_position_embeddings,
-                pad_token_id=processor.tokenizer.pad_token_id,
-                eos_token_id=processor.tokenizer.eos_token_id,
-                use_cache=True,
-                bad_words_ids=[[processor.tokenizer.unk_token_id]],
-                return_dict_in_generate=True,
-                num_beams=1,
-            )
+
+        # Add timeout to prevent hanging (60 seconds)
+        @contextmanager
+        def generation_timeout(seconds=60):
+            def timeout_handler(signum, frame):
+                raise TimeoutError(f"Model generation timed out after {seconds} seconds")
+
+            # Only use alarm on Unix-like systems
+            if hasattr(signal, 'SIGALRM'):
+                old_handler = signal.signal(signal.SIGALRM, timeout_handler)
+                signal.alarm(seconds)
+                try:
+                    yield
+                finally:
+                    signal.alarm(0)
+                    signal.signal(signal.SIGALRM, old_handler)
+            else:
+                # Windows doesn't support SIGALRM, skip timeout
+                yield
+
+        try:
+            with generation_timeout(60):
+                with torch.no_grad():
+                    outputs = model.generate(
+                        pixel_values,
+                        decoder_input_ids=decoder_input_ids,
+                        max_length=model.decoder.config.max_position_embeddings,
+                        pad_token_id=processor.tokenizer.pad_token_id,
+                        eos_token_id=processor.tokenizer.eos_token_id,
+                        use_cache=True,
+                        bad_words_ids=[[processor.tokenizer.unk_token_id]],
+                        return_dict_in_generate=True,
+                        num_beams=1,
+                    )
+        except TimeoutError as e:
+            return {"error": str(e)}
 
         sequence = processor.batch_decode(outputs.sequences)[0]
         sequence = sequence.replace(processor.tokenizer.eos_token, "").replace(processor.tokenizer.pad_token, "")
