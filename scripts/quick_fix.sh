@@ -23,7 +23,7 @@ fi
 
 echo "Running donut_minimal.py..."
 echo
-python3 donut_minimal.py
+python3 "$(dirname "$0")/../donut_minimal.py"
 
 if [ $? -ne 0 ]; then
     echo

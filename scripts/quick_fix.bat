@@ -22,7 +22,7 @@ if /i "%CLEAR_CACHE%"=="y" (
 
 echo Running donut_minimal.py...
 echo.
-python donut_minimal.py
+python "%~dp0..\donut_minimal.py"
 
 if errorlevel 1 (
     echo.
